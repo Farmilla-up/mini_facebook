@@ -1,5 +1,9 @@
-from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
+
+
+class NotAuthenticated(BasePermission):
+    def has_permission(self, request, view):
+        return not request.user or not request.user.is_authenticated
 
 
 

@@ -7,9 +7,9 @@ from .models import User
 # Register your models here.
 @admin.register(User)
 class UsersAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'user_name', 'avatar', 'created_at')
-    list_display_links = ('name', 'user_name')
-    search_fields = ('name', 'user_name')
+    list_display = ('id', 'name', 'username', 'avatar', 'created_at')
+    list_display_links = ('name', 'username')
+    search_fields = ('name', 'username')
     readonly_fields = ('created_at',)
 
 
