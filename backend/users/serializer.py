@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta :
         model = User
-        exclude = ('created_at','id')
+        exclude = ['created_at','id', 'friends']
 
 
 class ChangeUserSerializer(serializers.Serializer):

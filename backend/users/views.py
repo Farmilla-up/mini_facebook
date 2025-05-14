@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from .permissions import NotAuthenticated
-from .models import User
+from .models import User, Friendship
 from .serializer import UserSerializer, AddUserSerializer, ChangeUserSerializer
 
 
@@ -69,3 +69,19 @@ class DeleteUserView(DestroyAPIView):
     lookup_field = 'id'
     permission_classes = [AllowAny]
 
+
+class ShowAllFriends(RetrieveAPIView):
+    lookup_field = 'id'
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+    queryset = User.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        user = self.get_object()
+        sent = Friendship.objects.filter(from_user = user, accepted = True).values_list('to_user', flat=True)
+        received = Friendship.objects.filter(from_user = user, accepted = True).values_list('from_user', flat=True)
+        friends_id = list(sent) + list(received)
+        friends = User.objects.filter(id__in = friends_id)
+
+        serializer = self.get_serializer(friends, many = True)
+        return Response(serializer.data)
