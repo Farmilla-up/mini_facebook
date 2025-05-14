@@ -40,15 +40,15 @@ class CreateAccauntView(GenericAPIView):
 
 
 class GetPreciseUserView(RetrieveAPIView):
-    lookup_field = 'email'
+    lookup_field = 'id'
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
     queryset = User.objects.all()
 
     def get_object(self):
-        email = self.kwargs['id']
+        user_id = self.kwargs['id']
         try:
-            return User.objects.get(id=id)
+            return User.objects.get(id=user_id)
         except User.DoesNotExist:
             raise NotFound(detail="User with this email does not exist.")
 

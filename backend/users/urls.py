@@ -7,8 +7,9 @@ router = DefaultRouter()
 urlpatterns = [
     path('registrate/', CreateAccauntView.as_view(), name="registration"),
     path('users/', UserViewSet.as_view({'get': 'list'}), name='users_view'),
-    path("<str:id>/precise/",GetPreciseUserView.as_view(),  name = "get_precise_profile"),
-    path("<str:id>/change/", ChangeUserProfileView.as_view(), name = "change_user"),
-    path("<str:id>/delete/", DeleteUserView.as_view(), name = "delete_user")
+    path("<uuid:id>/precise/",GetPreciseUserView.as_view(),  name = "get_precise_profile"),
+    path("<uuid:id>/change/", ChangeUserProfileView.as_view(), name = "change_user"),
+    path("<uuid:id>/delete/", DeleteUserView.as_view(), name = "delete_user"),
+    path("<uuid:id>/post/", include("posts.urls"))
 
 ]
