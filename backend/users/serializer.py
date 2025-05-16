@@ -4,7 +4,7 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta :
-        fields = '__all__'
+        exclude = ['friends']
         model = User
 
 
@@ -28,4 +28,8 @@ class ChangeUserSerializer(serializers.Serializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         return data
+
+
+class EmptySerializer(serializers.Serializer):
+    pass
 
