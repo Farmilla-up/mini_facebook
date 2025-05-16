@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('posts', '0002_remove_post_owner_post_post_id_alter_post_id_and_more'),
+        ("posts", "0002_remove_post_owner_post_post_id_alter_post_id_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='post',
-            old_name='id',
-            new_name='owner_id',
+            model_name="post",
+            old_name="id",
+            new_name="owner_id",
         ),
     ]

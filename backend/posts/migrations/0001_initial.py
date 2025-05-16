@@ -10,21 +10,36 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('users', '0004_rename_user_name_user_username'),
+        ("users", "0004_rename_user_name_user_username"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Post',
+            name="Post",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('file', models.FileField(blank=True, null=True, upload_to='')),
-                ('title', models.CharField(blank=True, max_length=200)),
-                ('text', models.TextField(blank=True, max_length=200000)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('likes_number', models.IntegerField()),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to='users.user')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("file", models.FileField(blank=True, null=True, upload_to="")),
+                ("title", models.CharField(blank=True, max_length=200)),
+                ("text", models.TextField(blank=True, max_length=200000)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("likes_number", models.IntegerField()),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="posts",
+                        to="users.user",
+                    ),
+                ),
             ],
         ),
     ]

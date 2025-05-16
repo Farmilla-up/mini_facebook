@@ -8,28 +8,34 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('posts', '0001_initial'),
-        ('users', '0004_rename_user_name_user_username'),
+        ("posts", "0001_initial"),
+        ("users", "0004_rename_user_name_user_username"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='post',
-            name='owner',
+            model_name="post",
+            name="owner",
         ),
         migrations.AddField(
-            model_name='post',
-            name='post_id',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False),
+            model_name="post",
+            name="post_id",
+            field=models.UUIDField(
+                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='id',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to='users.user'),
+            model_name="post",
+            name="id",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="posts",
+                to="users.user",
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='likes_number',
+            model_name="post",
+            name="likes_number",
             field=models.IntegerField(default=0),
         ),
     ]

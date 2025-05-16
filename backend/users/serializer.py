@@ -3,21 +3,21 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    class Meta :
-        exclude = ['friends']
+    class Meta:
+        exclude = ["friends"]
         model = User
 
 
 class AddUserSerializer(serializers.ModelSerializer):
-    class Meta :
+    class Meta:
         model = User
-        exclude = ['created_at','id', 'friends']
+        exclude = ["created_at", "id", "friends"]
 
 
 class ChangeUserSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length= 50, required= False)
-    user_name = serializers.CharField(max_length= 50, required= False)
-    avatar = serializers.FileField(required= False)
+    name = serializers.CharField(max_length=50, required=False)
+    user_name = serializers.CharField(max_length=50, required=False)
+    avatar = serializers.FileField(required=False)
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
@@ -32,4 +32,3 @@ class ChangeUserSerializer(serializers.Serializer):
 
 class EmptySerializer(serializers.Serializer):
     pass
-

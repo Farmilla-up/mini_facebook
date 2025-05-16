@@ -7,22 +7,39 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=30, verbose_name='Имя')),
-                ('user_name', models.CharField(max_length=30, verbose_name='Юз')),
-                ('avatar', models.ImageField(blank=True, null=True, upload_to='photo', verbose_name='Ава')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Когда зареган')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=30, verbose_name="Имя")),
+                ("user_name", models.CharField(max_length=30, verbose_name="Юз")),
+                (
+                    "avatar",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="photo", verbose_name="Ава"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Когда зареган"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Пользователь',
-                'verbose_name_plural': 'Пользователи',
+                "verbose_name": "Пользователь",
+                "verbose_name_plural": "Пользователи",
             },
         ),
     ]
