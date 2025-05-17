@@ -1,5 +1,9 @@
+from datetime import datetime, timedelta
+
+from django.core.serializers import serialize
 from django.db.models import Q
 from django.shortcuts import render
+from django.utils.autoreload import raise_last_exception
 from rest_framework import viewsets, status
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import (
@@ -13,13 +17,20 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from .permissions import NotAuthenticated
-from .models import User, Friendship
+from .models import User, Friendship, PreRegistration
 from .serializer import (
     UserSerializer,
     AddUserSerializer,
     ChangeUserSerializer,
     EmptySerializer,
+    ConfirmationEmailSerializer,
 )
+from .utils import SendConfirmationCode
+
+from decouple import config
+from random import randint
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -45,8 +56,82 @@ class CreateAccauntView(GenericAPIView):
             ).exists():
                 return Response({"error": "This username already is taken"}, status=400)
 
-            serializer.save()
-            return Response({"data": serializer.data}, status=201)
+            email = serializer.validated_data["email"]
+            username = serializer.validated_data["username"]
+            name = serializer.validated_data["name"]
+
+            code = randint(10000, 99999)
+            PreRegistration.objects.create(
+                email=email,
+                username=username,
+                name=name,
+                code=code,
+            )
+            text = f"Your confirmation code : {code}, if you did not registrate , please ignore it"
+            password = config("APP_PASSWORD")
+            email_from = config("EMAIL_FROM")
+
+            send = SendConfirmationCode(
+                email_from=email_from,
+                email_to=email,
+                text_with_code=text,
+                password=password,
+            )
+
+            send.connect()
+            send.send()
+            send.close()
+
+            return Response(
+                {
+                    "message": "please verify your email",
+                    "next": "api/v1/user/confirm-email",
+                    "email": email,
+                },
+                status=201,
+            )
+
+        except Exception as e:
+            return Response({"error": str(e)})
+
+
+class ConfirmEmailView(GenericAPIView):
+    queryset = []
+    permission_classes = [AllowAny]
+    serializer_class = ConfirmationEmailSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            code = serializer.validated_data["code"]
+            email = serializer.validated_data["email"]
+
+            try:
+                user = PreRegistration.objects.get(email=email)
+            except PreRegistration.DoesNotExist:
+                return Response({"error": "Email not found"}, status=404)
+
+            if user.code != code:
+                return Response({"error": "Invalid code"}, status=400)
+
+            if user.created_at < timezone.now() - timedelta(minutes=15):
+                user.delete()
+                return Response({"error": "Code expired"}, status=400)
+
+            new_user = User.objects.create(
+                username=user.username,
+                email=user.email,
+                name=user.name,
+                avatar=user.avatar,
+            )
+            user.delete()
+
+            return Response(
+                {"message": "Email confirmed, account created", "user_id": new_user.id},
+                status=201,
+            )
 
         except Exception as e:
             return Response({"error": str(e)})

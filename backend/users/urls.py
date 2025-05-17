@@ -13,12 +13,14 @@ from .views import (
     SubscribesListView,
     SubscribersListView,
     DeleteFriendView,
+    ConfirmEmailView,
 )
 
 router = DefaultRouter()
 
 urlpatterns = [
     path("registrate/", CreateAccauntView.as_view(), name="registration"),
+    path("confirm-email/", ConfirmEmailView.as_view(), name="confirm_email"),
     path("users/", UserViewSet.as_view({"get": "list"}), name="users_view"),
     path(
         "<uuid:id>/precise/", GetPreciseUserView.as_view(), name="get_precise_profile"
@@ -48,3 +50,4 @@ urlpatterns = [
     ),
     path("<uuid:id>/post/", include("posts.urls")),
 ]
+# В будущем на лог ин

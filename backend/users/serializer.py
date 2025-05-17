@@ -32,3 +32,8 @@ class ChangeUserSerializer(serializers.Serializer):
 
 class EmptySerializer(serializers.Serializer):
     pass
+
+
+class ConfirmationEmailSerializer(serializers.Serializer):
+    code = serializers.IntegerField(max_value=99999, min_value=10000)
+    email = serializers.EmailField(max_length=4000)

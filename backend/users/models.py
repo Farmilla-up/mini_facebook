@@ -16,13 +16,24 @@ class User(models.Model):
     )
 
     # закрытый ли профиль
-
+    # password
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
         return self.name
+
+
+class PreRegistration(models.Model):
+    email = models.EmailField(max_length=100)
+    name = models.CharField(max_length=30, verbose_name="Имя")
+    code = models.IntegerField()
+    username = models.CharField(max_length=30, verbose_name="Юз")
+    avatar = models.ImageField(
+        upload_to="photo", null=True, blank=True, verbose_name="Ава"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Friendship(models.Model):
