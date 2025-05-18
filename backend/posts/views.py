@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.utils.autoreload import raise_last_exception
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import (
     GenericAPIView,

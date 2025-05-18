@@ -1,0 +1,8 @@
+Django>=4.0
+djangorestframework
+python-decouple
+celery
+redis
+black
+djangorestframework-simplejwt
+Pillow
