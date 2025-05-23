@@ -12,4 +12,4 @@ class ShowAllPostsSerializer(serializers.ModelSerializer):
 class AddPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        exclude = ["post_id", "owner_id", "created_at", "updated_at", "likes_number"]
+        exclude = ["id", "owner_id", "created_at", "updated_at", "likes_number"]

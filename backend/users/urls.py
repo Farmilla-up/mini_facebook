@@ -49,5 +49,6 @@ urlpatterns = [
         name="all_subscribers",
     ),
     path("<uuid:id>/post/", include("posts.urls")),
+
 ]
 # В будущем на лог ин

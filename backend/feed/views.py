@@ -15,14 +15,20 @@ class MyFeedView(ListAPIView):
     queryset = Post.objects.all()
 
     def get_queryset(self):
-        user = User.objects.get(id = self.kwargs['id'])
+        try :
+            user = User.objects.get(id = self.kwargs['id'])
 
-        friends_from_or_subscribed  = Friendship.objects.filter(from_user = user ).values_list("to_user", flat= True)
-        friends_to = Friendship.objects.filter(to_user = user , accepted = True).values_list("from_user", flat= True)
+            friends_from_or_subscribed  = Friendship.objects.filter(from_user = user ).values_list("to_user", flat= True)
+            friends_to = Friendship.objects.filter(to_user = user , accepted = True).values_list("from_user", flat= True)
 
-        all_id = list(friends_to) + list(friends_from_or_subscribed)
+            all_id = list(friends_to) + list(friends_from_or_subscribed)
 
-        posts = Post.objects.filter(owner_id__in = all_id).order_by("-created_at")
+            posts = Post.objects.filter(owner__in = all_id).order_by("-created_at")
 
-        return posts
+            return posts
+
+        except Exception as e :
+            return Response({"error" : str(e)})
+
+
 

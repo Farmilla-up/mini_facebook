@@ -30,7 +30,7 @@ class ShowPrecisePostView(RetrieveAPIView):
     def get_object(self):
         try:
             post_id = self.kwargs.get("post_id")
-            return Post.objects.get(post_id=post_id)
+            return Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             raise NotFound("Пост не найден")
 
