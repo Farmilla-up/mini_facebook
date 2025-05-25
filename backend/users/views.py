@@ -35,12 +35,21 @@ from django.utils import timezone
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+      ViewSet для просмотра и редактирования пользователей.
+      Поддерживает все стандартные действия CRUD через /users/.
+      """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
 
 class CreateAccauntView(GenericAPIView):
+    """
+       Представление для создания аккаунта с предварительной регистрацией.
+       Проверяет уникальность email и username, сохраняет данные во временную модель PreRegistration
+       и отправляет код подтверждения на почту.
+       """
     queryset = User.objects.all()
     serializer_class = AddUserSerializer
     permission_classes = [NotAuthenticated]
@@ -97,6 +106,10 @@ class CreateAccauntView(GenericAPIView):
 
 
 class ConfirmEmailView(GenericAPIView):
+    """
+        Представление для подтверждения email с помощью кода.
+        Проверяет корректность и срок действия кода. При успешной проверке создаёт пользователя.
+        """
     queryset = []
     permission_classes = [AllowAny]
     serializer_class = ConfirmationEmailSerializer
@@ -139,6 +152,10 @@ class ConfirmEmailView(GenericAPIView):
 
 
 class GetPreciseUserView(RetrieveAPIView):
+    """
+        Получение информации о конкретном пользователе по ID.
+        Возвращает сериализованные данные пользователя.
+        """
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -153,6 +170,10 @@ class GetPreciseUserView(RetrieveAPIView):
 
 
 class ChangeUserProfileView(UpdateAPIView):
+    """
+        Представление для обновления данных пользователя по email (в URL).
+        Использует ChangeUserSerializer для валидации и обновления.
+        """
     queryset = User.objects.all()
     serializer_class = ChangeUserSerializer
     permission_classes = [AllowAny]
@@ -162,12 +183,19 @@ class ChangeUserProfileView(UpdateAPIView):
 
 
 class DeleteUserView(DestroyAPIView):
+    """
+        Представление для удаления пользователя по ID.
+        """
     queryset = User.objects.all()
     lookup_field = "id"
     permission_classes = [AllowAny]
 
 
 class ShowAllFriends(RetrieveAPIView):
+    """
+       Получение списка всех друзей пользователя (взаимная подписка).
+       Возвращает список пользователей, с которыми установлена дружба.
+       """
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -189,6 +217,10 @@ class ShowAllFriends(RetrieveAPIView):
 
 
 class RequestsListFriendShipView(RetrieveAPIView):
+    """
+       Получение входящих запросов в друзья (пользователю ещё нужно принять).
+       Возвращает список пользователей, отправивших запрос.
+       """
     lookup_field = "id"
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
@@ -210,6 +242,10 @@ class RequestsListFriendShipView(RetrieveAPIView):
 
 
 class AcceptOrDenyFriendShip(GenericAPIView):
+    """
+       Обработка действий над запросом в друзья: принятие или отклонение.
+       В зависимости от параметра 'action' в URL выполняет нужное действие.
+       """
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = EmptySerializer
@@ -246,6 +282,10 @@ class AcceptOrDenyFriendShip(GenericAPIView):
 
 
 class SubscribeView(GenericAPIView):
+    """
+        Отправка запроса на добавление в друзья (односторонняя подписка).
+        Запрещает подписку на самого себя и повторные запросы.
+        """
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = EmptySerializer
@@ -280,6 +320,9 @@ class SubscribeView(GenericAPIView):
 
 
 class SubscribesListView(RetrieveAPIView):
+    """
+        Список всех пользователей, на которых подписан текущий пользователь (ожидают принятия).
+        """
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -297,6 +340,9 @@ class SubscribesListView(RetrieveAPIView):
 
 
 class SubscribersListView(RetrieveAPIView):
+    """
+       Список всех пользователей, подписавшихся на текущего пользователя (ожидают подтверждения).
+       """
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -317,6 +363,10 @@ class SubscribersListView(RetrieveAPIView):
 
 
 class DeleteFriendView(GenericAPIView):
+    """
+        Удаление друга из списка друзей (взаимная дружба разрывается).
+        После удаления создаётся односторонняя подписка со стороны бывшего друга.
+        """
     permission_classes = [AllowAny]
     serializer_class = EmptySerializer
     queryset = User.objects.all()

@@ -15,6 +15,9 @@ from .models import Post
 
 
 class ShowAllPostsView(ListAPIView):
+    """
+    показывает все посты принадлежащие кому то
+    """
     serializer_class = ShowAllPostsSerializer
     queryset = Post.objects.all()
 
@@ -23,6 +26,9 @@ class ShowAllPostsView(ListAPIView):
 
 
 class ShowPrecisePostView(RetrieveAPIView):
+    """
+    Показывает пост по айди
+    """
     queryset = Post.objects.all()
     permission_classes = [AllowAny]
     serializer_class = ShowAllPostsSerializer
@@ -36,6 +42,9 @@ class ShowPrecisePostView(RetrieveAPIView):
 
 
 class AddPostView(GenericAPIView):
+    """
+    Добавляет пост
+    """
     serializer_class = AddPostSerializer
     permission_classes = [AllowAny]
     queryset = Post.objects.all()
@@ -47,7 +56,7 @@ class AddPostView(GenericAPIView):
             data = serializer.validated_data
 
             if not data["text"] and not data["title"] and not data["file"]:
-                return Response({"error": "Can be empty"})
+                return Response({"error": "Can't be empty"})
             user_id = kwargs.get("id")
             try:
                 user = User.objects.get(id=user_id)
@@ -62,6 +71,9 @@ class AddPostView(GenericAPIView):
 
 
 class DeletePostView(DestroyAPIView):
+    """
+    удаляет пост по айди
+    """
     permission_classes = [AllowAny]
     queryset = Post.objects.all()
     lookup_field = "post_id"

@@ -3,6 +3,9 @@ import uuid
 
 
 class User(models.Model):
+    """
+        Основная модель пользователя.
+        """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=30, verbose_name="Имя")
     username = models.CharField(max_length=30, verbose_name="Юз")
@@ -26,6 +29,9 @@ class User(models.Model):
 
 
 class PreRegistration(models.Model):
+    """
+        Модель для хранения предварительных регистраций с кодом подтверждения.
+        """
     email = models.EmailField(max_length=100)
     name = models.CharField(max_length=30, verbose_name="Имя")
     code = models.IntegerField()
@@ -37,6 +43,9 @@ class PreRegistration(models.Model):
 
 
 class Friendship(models.Model):
+    """
+       Промежуточная модель для связи друзей и подписок.
+       """
     from_user = models.ForeignKey(
         "User", related_name="sent_requests", on_delete=models.CASCADE
     )

@@ -10,7 +10,7 @@ from posts.views import (
 urlpatterns = [
     path("<uuid:id>/posts/", ShowAllPostsView.as_view(), name="show_all_user_posts"),
     path(
-        "precise/<uuid:post_id>/",
+        "precise/<uuid:id>/",
         ShowPrecisePostView.as_view(),
         name="show_precise_post",
     ),

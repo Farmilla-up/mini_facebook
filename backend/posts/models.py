@@ -15,4 +15,3 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     likes_number = models.IntegerField(default=0)
     comments_number = models.IntegerField(default=0)
-

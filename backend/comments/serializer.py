@@ -8,8 +8,7 @@ class CommentCreateSerializer(serializers.Serializer):
     text = serializers.CharField(max_length=10000)
 
 
-
 class CommentSerializer(serializers.ModelSerializer):
-    class Meta :
+    class Meta:
         model = Comment
-        exclude = ['created_at', 'updated_at']
+        exclude = ["created_at", "updated_at"]

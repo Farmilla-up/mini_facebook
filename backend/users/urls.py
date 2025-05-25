@@ -48,6 +48,5 @@ urlpatterns = [
         DeleteFriendView.as_view(),
         name="all_subscribers",
     ),
-
 ]
 # В будущем на лог ин

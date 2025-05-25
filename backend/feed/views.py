@@ -10,6 +10,9 @@ from users.models import User, Friendship
 
 
 class MyFeedView(ListAPIView):
+    """
+    Показывает посты в порядке новых (от подписок и друзей)
+    """
     serializer_class = ShowAllPostsSerializer
     permission_classes = [AllowAny]
     queryset = Post.objects.all()
