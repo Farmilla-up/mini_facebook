@@ -53,7 +53,7 @@ class CreateAccauntView(GenericAPIView):
                 return Response({"error": "This email already logged in "}, status=400)
 
             if User.objects.filter(
-                username =serializer.validated_data["username"]
+                username=serializer.validated_data["username"]
             ).exists():
                 return Response({"error": "This username already is taken"}, status=400)
 
@@ -357,7 +357,3 @@ class DeleteFriendView(GenericAPIView):
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
