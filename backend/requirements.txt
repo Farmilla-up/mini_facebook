@@ -6,3 +6,4 @@ redis
 black
 djangorestframework-simplejwt
 Pillow
+django-redis

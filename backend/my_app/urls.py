@@ -11,7 +11,6 @@ from rest_framework_simplejwt.views import (
 )
 from users.views import UserViewSet
 
-
 router = DefaultRouter()
 
 

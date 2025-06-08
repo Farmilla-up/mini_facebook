@@ -7,19 +7,26 @@ from rest_framework.permissions import AllowAny
 from posts.models import Post
 from posts.serializer import ShowAllPostsSerializer
 from users.models import User, Friendship
+from django.core.cache import cache
 
 
 class MyFeedView(ListAPIView):
     """
     Показывает посты в порядке новых (от подписок и друзей)
     """
+
     serializer_class = ShowAllPostsSerializer
     permission_classes = [AllowAny]
     queryset = Post.objects.all()
 
     def get_queryset(self):
         try:
+
+            cache_key = f'cached_feed_{self.kwargs["id"]}'
             user = User.objects.get(id=self.kwargs["id"])
+            cache_qr = cache.get(cache_key)
+            if cache_qr:
+                return cache_qr
 
             friends_from_or_subscribed = Friendship.objects.filter(
                 from_user=user
@@ -31,6 +38,7 @@ class MyFeedView(ListAPIView):
             all_id = list(friends_to) + list(friends_from_or_subscribed)
 
             posts = Post.objects.filter(owner__in=all_id).order_by("-created_at")
+            cache.set(cache_key, posts, timeout=60)
 
             return posts
 

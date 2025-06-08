@@ -6,7 +6,7 @@ urlpatterns = [
     path(
         "<uuid:id>/create/<uuid:post_id>/<int:parent_comment_id>/",
         CreateCommentView.as_view(),
-        name="create_comment",
+        name="create_comment_as_reply",
     ),
     path(
         "<uuid:id>/create/<uuid:post_id>/",

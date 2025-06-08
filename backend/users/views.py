@@ -32,13 +32,15 @@ from decouple import config
 from random import randint
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.core.cache import cache
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """
-      ViewSet для просмотра и редактирования пользователей.
-      Поддерживает все стандартные действия CRUD через /users/.
-      """
+    ViewSet для просмотра и редактирования пользователей.
+    Поддерживает все стандартные действия CRUD через /users/.
+    """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -46,10 +48,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class CreateAccauntView(GenericAPIView):
     """
-       Представление для создания аккаунта с предварительной регистрацией.
-       Проверяет уникальность email и username, сохраняет данные во временную модель PreRegistration
-       и отправляет код подтверждения на почту.
-       """
+    Представление для создания аккаунта с предварительной регистрацией.
+    Проверяет уникальность email и username, сохраняет данные во временную модель PreRegistration
+    и отправляет код подтверждения на почту.
+    """
+
     queryset = User.objects.all()
     serializer_class = AddUserSerializer
     permission_classes = [NotAuthenticated]
@@ -107,9 +110,10 @@ class CreateAccauntView(GenericAPIView):
 
 class ConfirmEmailView(GenericAPIView):
     """
-        Представление для подтверждения email с помощью кода.
-        Проверяет корректность и срок действия кода. При успешной проверке создаёт пользователя.
-        """
+    Представление для подтверждения email с помощью кода.
+    Проверяет корректность и срок действия кода. При успешной проверке создаёт пользователя.
+    """
+
     queryset = []
     permission_classes = [AllowAny]
     serializer_class = ConfirmationEmailSerializer
@@ -153,27 +157,40 @@ class ConfirmEmailView(GenericAPIView):
 
 class GetPreciseUserView(RetrieveAPIView):
     """
-        Получение информации о конкретном пользователе по ID.
-        Возвращает сериализованные данные пользователя.
-        """
+    Получение информации о конкретном пользователе по ID.
+    Возвращает сериализованные данные пользователя.
+    """
+
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
     queryset = User.objects.all()
 
-    def get_object(self):
+    def get(self, request, *args, **kwargs):
         user_id = self.kwargs["id"]
+        cache_key = f"cache_user_{user_id}"
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return Response(cached_data)
+
         try:
-            return User.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            raise NotFound(detail="User with this email does not exist.")
+            raise NotFound(detail="User with this ID does not exist.")
+
+        serializer = self.get_serializer(user)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=60)
+        return Response(data)
 
 
 class ChangeUserProfileView(UpdateAPIView):
     """
-        Представление для обновления данных пользователя по email (в URL).
-        Использует ChangeUserSerializer для валидации и обновления.
-        """
+    Представление для обновления данных пользователя по email (в URL).
+    Использует ChangeUserSerializer для валидации и обновления.
+    """
+
     queryset = User.objects.all()
     serializer_class = ChangeUserSerializer
     permission_classes = [AllowAny]
@@ -184,8 +201,9 @@ class ChangeUserProfileView(UpdateAPIView):
 
 class DeleteUserView(DestroyAPIView):
     """
-        Представление для удаления пользователя по ID.
-        """
+    Представление для удаления пользователя по ID.
+    """
+
     queryset = User.objects.all()
     lookup_field = "id"
     permission_classes = [AllowAny]
@@ -193,9 +211,10 @@ class DeleteUserView(DestroyAPIView):
 
 class ShowAllFriends(RetrieveAPIView):
     """
-       Получение списка всех друзей пользователя (взаимная подписка).
-       Возвращает список пользователей, с которыми установлена дружба.
-       """
+    Получение списка всех друзей пользователя (взаимная подписка).
+    Возвращает список пользователей, с которыми установлена дружба.
+    """
+
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -203,6 +222,11 @@ class ShowAllFriends(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         user = self.get_object()
+        cache_key = f"all_friends_{user.id}"
+        cache_qr = cache.get(cache_key)
+        if cache_qr:
+            return Response(cache_qr)
+
         sent = Friendship.objects.filter(from_user=user, accepted=True).values_list(
             "to_user", flat=True
         )
@@ -213,39 +237,46 @@ class ShowAllFriends(RetrieveAPIView):
         friends = User.objects.filter(id__in=friends_id)
 
         serializer = self.get_serializer(friends, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=60)
+        return Response(data)
 
 
 class RequestsListFriendShipView(RetrieveAPIView):
     """
-       Получение входящих запросов в друзья (пользователю ещё нужно принять).
-       Возвращает список пользователей, отправивших запрос.
-       """
+    Входящие запросы в друзья (тебе ещё нужно принять).
+    """
+
     lookup_field = "id"
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            user = self.get_object()
-            requests = Friendship.objects.filter(
-                to_user=user,
-                accepted=False,
-            ).select_related("from_user")
+        user = self.get_object()
+        cache_key = f"friend_requests_{user.id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response({"data": cached})
 
-            users = [f.from_user for f in requests]
-            serializer = self.get_serializer(users, many=True)
-            return Response({"data": serializer.data})
-        except Exception as e:
-            return Response({"error": str(e)})
+        requests = Friendship.objects.filter(
+            to_user=user,
+            accepted=False,
+        ).select_related("from_user")
+
+        users = [f.from_user for f in requests]
+        serializer = self.get_serializer(users, many=True)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=60)
+        return Response({"data": data})
 
 
 class AcceptOrDenyFriendShip(GenericAPIView):
     """
-       Обработка действий над запросом в друзья: принятие или отклонение.
-       В зависимости от параметра 'action' в URL выполняет нужное действие.
-       """
+    Обработка действий над запросом в друзья: принятие или отклонение.
+    В зависимости от параметра 'action' в URL выполняет нужное действие.
+    """
+
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = EmptySerializer
@@ -283,9 +314,10 @@ class AcceptOrDenyFriendShip(GenericAPIView):
 
 class SubscribeView(GenericAPIView):
     """
-        Отправка запроса на добавление в друзья (односторонняя подписка).
-        Запрещает подписку на самого себя и повторные запросы.
-        """
+    Отправка запроса на добавление в друзья (односторонняя подписка).
+    Запрещает подписку на самого себя и повторные запросы.
+    """
+
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = EmptySerializer
@@ -321,8 +353,9 @@ class SubscribeView(GenericAPIView):
 
 class SubscribesListView(RetrieveAPIView):
     """
-        Список всех пользователей, на которых подписан текущий пользователь (ожидают принятия).
-        """
+    Пользователи, на которых ты подписан (ожидают подтверждения).
+    """
+
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
@@ -330,43 +363,54 @@ class SubscribesListView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         user = self.get_object()
+        cache_key = f"subscribed_to_{user.id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
+
         sent = Friendship.objects.filter(from_user=user, accepted=False).values_list(
             "to_user", flat=True
         )
         users = User.objects.filter(id__in=sent)
-
         serializer = self.get_serializer(users, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=60)
+        return Response(data)
 
 
 class SubscribersListView(RetrieveAPIView):
     """
-       Список всех пользователей, подписавшихся на текущего пользователя (ожидают подтверждения).
-       """
+    Пользователи, которые подписались на тебя (ждут подтверждения).
+    """
+
     lookup_field = "id"
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
     queryset = User.objects.all()
 
     def retrieve(self, request, *args, **kwargs):
-        try:
-            user = self.get_object()
-            sent = Friendship.objects.filter(to_user=user, accepted=False).values_list(
-                "from_user", flat=True
-            )
-            users = User.objects.filter(id__in=sent)
+        user = self.get_object()
+        cache_key = f"subscribers_of_{user.id}"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
 
-            serializer = self.get_serializer(users, many=True)
-            return Response(serializer.data)
-        except Exception as e:
-            return Response({"error": str(e)})
+        sent = Friendship.objects.filter(to_user=user, accepted=False).values_list(
+            "from_user", flat=True
+        )
+        users = User.objects.filter(id__in=sent)
+        serializer = self.get_serializer(users, many=True)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=60)
+        return Response(data)
 
 
 class DeleteFriendView(GenericAPIView):
     """
-        Удаление друга из списка друзей (взаимная дружба разрывается).
-        После удаления создаётся односторонняя подписка со стороны бывшего друга.
-        """
+    Удаление друга из списка друзей (взаимная дружба разрывается).
+    После удаления создаётся односторонняя подписка со стороны бывшего друга.
+    """
+
     permission_classes = [AllowAny]
     serializer_class = EmptySerializer
     queryset = User.objects.all()

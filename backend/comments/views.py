@@ -13,12 +13,14 @@ from posts.models import Post
 from users.models import User
 from .models import Comment
 from comments.serializer import CommentCreateSerializer, CommentSerializer
+from django.core.cache import cache
 
 
 class CreateCommentView(GenericAPIView):
     """
     Позволяет добавить коментарий, он может быть дочерним (т е ответом на какой то ), а может и не быть
     """
+
     serializer_class = CommentCreateSerializer
     permission_classes = [AllowAny]
     queryset = Comment.objects.all()
@@ -60,18 +62,31 @@ class ListOfComments(ListAPIView):
     """
     Показывает все коментарии на пост
     """
+
     serializer_class = CommentSerializer
     permission_classes = [AllowAny]
     queryset = Comment.objects.all()
 
-    def get_object(self):
-        return Comment.objects.filter(id=self.kwargs["post_id"])
+    def get(self, request, *args, **kwargs):
+        post_id = self.kwargs["post_id"]
+        cache_key = f"comments_for_post_{post_id}"
+        data = cache.get(cache_key)
+
+        if data is not None:
+            return Response(data)
+
+        queryset = Comment.objects.filter(to_post=post_id)
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=30)
+        return Response(data)
 
 
 class DeleteCommentView(DestroyAPIView):
     """
     Удаляет коментарий и все ответы на него соотвественно
     """
+
     permission_classes = [AllowAny]
     queryset = Comment.objects.all()
     lookup_field = "id"
@@ -96,4 +111,9 @@ class DeleteCommentView(DestroyAPIView):
 
 
 class ChangeCommentView(UpdateAPIView):
-    pass
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)

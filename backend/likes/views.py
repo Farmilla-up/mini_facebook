@@ -1,3 +1,4 @@
+from django.core.serializers import get_serializer
 from django.shortcuts import render
 from django.views.generic import CreateView
 from rest_framework.response import Response
@@ -16,7 +17,7 @@ from posts.models import Post
 from posts.serializer import ShowAllPostsSerializer
 from users.models import User
 from users.serializer import EmptySerializer
-
+from django.core.cache import cache
 
 # Create your views here.
 
@@ -25,6 +26,7 @@ class LikeActionPostView(CreateAPIView):
     """
     Позволяет лайкнуть или УБРАТЬ лайк (т е дизлайков нет)
     """
+
     permission_classes = [AllowAny]
     serializer_class = EmptySerializer
 
@@ -64,11 +66,22 @@ class MyLikesView(ListAPIView):
     """
     Все посты которым ты поставил лайк
     """
+
     permission_classes = [AllowAny]
     queryset = Like.objects.all()
     serializer_class = ShowAllPostsSerializer
 
-    def get_queryset(self):
-        user = User.objects.get(id=self.kwargs["id"])
+    def list(self, request, *args, **kwargs):
+        user_id = self.kwargs["id"]
+        user = User.objects.get(id=user_id)
+        cache_key = f"like_cache_{user_id}"
+        cache_qr = cache.get(cache_key)
+        if cache_qr:
+            return Response(cache_qr)
+
         liked = Like.objects.filter(from_who=user).values_list("to_post_id", flat=True)
-        return Post.objects.filter(id__in=liked).order_by("-created_at")
+        posts = Post.objects.filter(id__in=liked).order_by("-created_at")
+        serializer = self.get_serializer(posts, many=True)
+        data = serializer.data
+        cache.set(cache_key, data, timeout=60)
+        return Response(data)

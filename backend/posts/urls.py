@@ -10,10 +10,10 @@ from posts.views import (
 urlpatterns = [
     path("<uuid:id>/posts/", ShowAllPostsView.as_view(), name="show_all_user_posts"),
     path(
-        "precise/<uuid:id>/",
+        "<uuid:id>/precise/",
         ShowPrecisePostView.as_view(),
         name="show_precise_post",
     ),
     path("<uuid:id>/create/", AddPostView.as_view(), name="add_post_view"),
-    path("delete/<uuid:post_id>/", DeletePostView.as_view(), name="delete_post"),
+    path("<uuid:id>/delete/", DeletePostView.as_view(), name="delete_post"),
 ]
