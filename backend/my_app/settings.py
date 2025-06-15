@@ -2,6 +2,7 @@ import os.path
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from django.conf import settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -178,4 +179,18 @@ CACHES = {
 
 USE_TZ = True
 
-# AUTH_USER_MODEL = 'users.User'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    "clean-pre-registrations-every-15-minutes": {
+        "task": "users.tasks.delete_expired_preregistrations",
+        "schedule": crontab(minute="*/15"),
+    },
+    "clean_old_notifications_every_30_days": {
+        "task" : "posts.tasks.delete_expired_notifications",
+        "schedule" : crontab(minute = 0 , hour = 0 , day_of_month= 1 )
+    }
+}
+
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True

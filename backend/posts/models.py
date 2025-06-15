@@ -15,3 +15,12 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     likes_number = models.IntegerField(default=0)
     comments_number = models.IntegerField(default=0)
+
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+

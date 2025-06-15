@@ -1,7 +1,6 @@
 from django.core.serializers import serialize
 from rest_framework import serializers
-from .models import Post
-
+from .models import Post, Notification
 
 class ShowAllPostsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,3 +19,9 @@ class AddPostSerializer(serializers.ModelSerializer):
             "likes_number",
             "comments_number",
         ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Notification
+        exclude = ["recipient"]

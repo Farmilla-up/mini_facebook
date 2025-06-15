@@ -26,13 +26,14 @@ from .serializer import (
     EmptySerializer,
     ConfirmationEmailSerializer,
 )
-from .utils import SendConfirmationCode
+from .utils import SendMail
 
 from decouple import config
 from random import randint
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.core.cache import cache
+from .tasks import send_welcome_email, send_confirmation_code
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -74,26 +75,15 @@ class CreateAccauntView(GenericAPIView):
             name = serializer.validated_data["name"]
 
             code = randint(10000, 99999)
+
             PreRegistration.objects.create(
                 email=email,
                 username=username,
                 name=name,
                 code=code,
             )
-            text = f"Your confirmation code : {code}, if you did not registrate , please ignore it"
-            password = config("APP_PASSWORD")
-            email_from = config("EMAIL_FROM")
 
-            send = SendConfirmationCode(
-                email_from=email_from,
-                email_to=email,
-                text_with_code=text,
-                password=password,
-            )
-
-            send.connect()
-            send.send()
-            send.close()
+            send_confirmation_code.delay(email_to = email, code = code)
 
             return Response(
                 {
@@ -127,7 +117,7 @@ class ConfirmEmailView(GenericAPIView):
             email = serializer.validated_data["email"]
 
             try:
-                user = PreRegistration.objects.get(email=email)
+                user = PreRegistration.objects.filter(email=email).first()
             except PreRegistration.DoesNotExist:
                 return Response({"error": "Email not found"}, status=404)
 
@@ -145,6 +135,8 @@ class ConfirmEmailView(GenericAPIView):
                 avatar=user.avatar,
             )
             user.delete()
+
+            send_welcome_email.delay(user.email, user.name)
 
             return Response(
                 {"message": "Email confirmed, account created", "user_id": new_user.id},

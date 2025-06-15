@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 from .models import User, Friendship
-
+from .tasks import compress_image
 
 @receiver([post_save, post_delete], sender=User)
 def invalidate_user_info_cache(sender, instance, **kwargs):
@@ -16,3 +16,9 @@ def invalidate_users_friends_cache(sender, instance, **kwargs):
     cache.delete(f"subscribed_to_{instance.from_user.id}")
     cache.delete(f"subscribers_of_{instance.to_user.id}")
     cache.delete(f"friend_requests_{instance.to_user.id}")
+
+
+@receiver([post_save], sender = User)
+def compress_avatar_after_upload(sender, instance, **kwargs):
+    if instance.avatar :
+        compress_image.delay(instance.id)

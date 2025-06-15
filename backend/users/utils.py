@@ -3,12 +3,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-class SendConfirmationCode:
+class SendMail:
     """
     Класс для отправки письма с кодом подтверждения на email с использованием SMTP через Gmail.
     """
 
-    def __init__(self, email_from, email_to, text_with_code, password):
+    def __init__(self, email_from, email_to, text, password, subject):
         """
         Инициализирует параметры письма и подключения к SMTP-серверу.
 
@@ -19,8 +19,8 @@ class SendConfirmationCode:
         """
         self.email_from = email_from
         self.email_to = email_to
-        self.subject = "Code confirmation"
-        self.text_with_code = text_with_code
+        self.subject = subject
+        self.text_with_code = text
         self.password = password
         self.smtp_server = "smtp.gmail.com"
         self.port = 465

@@ -13,10 +13,11 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from posts.serializer import ShowAllPostsSerializer, AddPostSerializer
+from posts.serializer import ShowAllPostsSerializer, AddPostSerializer, NotificationSerializer
 from users.models import User
-from .models import Post
+from .models import Post, Notification
 from django.core.cache import cache
+from .tasks import notify_friends
 
 # Create your views here.
 
@@ -96,6 +97,8 @@ class AddPostView(GenericAPIView):
                 return Response({"error": "User not found"}, status=404)
 
             serializer.save(owner=user)
+            post = serializer.instance
+            notify_friends.delay(user.id, post.id)
             return Response({"data": serializer.data}, status=201)
 
         except Exception as e:
@@ -113,3 +116,27 @@ class DeletePostView(DestroyAPIView):
 
     def perform_destroy(self, instance):
         instance.delete()
+
+
+
+class MyNotifications(ListAPIView):
+    """Мои оповещения """
+    permission_classes = [AllowAny]
+    serializer_class =  NotificationSerializer
+    queryset = Notification.objects.all()
+
+    def list(self, request , *args, **kwargs):
+        user_id = kwargs.get("id")
+        cache_key = f'notifications_about_post_{user_id}'
+        cache_qr = cache.get(cache_key)
+
+        if cache_qr :
+            return cache_qr
+
+        user = User.objects.get(id = user_id)
+
+        queryset = Notification.objects.filter(recipient = user).order_by("-created_at")
+        cache.set(cache_key, queryset, timeout = 60)
+
+        return queryset
+

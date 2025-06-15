@@ -7,3 +7,5 @@ black
 djangorestframework-simplejwt
 Pillow
 django-redis
+pytest
+pytest-django
