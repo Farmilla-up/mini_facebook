@@ -10,3 +10,9 @@ venv/
 .idea/
 .vscode/
 .git/
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.log
+

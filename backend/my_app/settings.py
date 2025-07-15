@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "chat",
     "users",
     "posts",
     "comments",
@@ -179,7 +180,7 @@ CACHES = {
 
 USE_TZ = True
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = "redis://localhost:6379/0"
 
 CELERY_BEAT_SCHEDULE = {
     "clean-pre-registrations-every-15-minutes": {
@@ -187,9 +188,9 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="*/15"),
     },
     "clean_old_notifications_every_30_days": {
-        "task" : "posts.tasks.delete_expired_notifications",
-        "schedule" : crontab(minute = 0 , hour = 0 , day_of_month= 1 )
-    }
+        "task": "posts.tasks.delete_expired_notifications",
+        "schedule": crontab(minute=0, hour=0, day_of_month=1),
+    },
 }
 
 CELERY_TASK_ALWAYS_EAGER = True

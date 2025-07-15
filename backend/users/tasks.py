@@ -8,30 +8,32 @@ from .utils import SendMail
 from decouple import config
 from io import BytesIO
 
+
 @shared_task
 def delete_expired_preregistrations():
     """
     Перманетно удаляет временные не потвержденные аккаунты
     :return:
     """
-    threshold = timezone.now() - timedelta(minutes= 15)
+    threshold = timezone.now() - timedelta(minutes=15)
     PreRegistration.objects.filter(created_at__lt=threshold).delete()
 
     return
 
+
 @shared_task
-def send_welcome_email(email_to, name ):
-    text = f'{name}, благодарим за регистрацию, надеюсь вы еще зацените .. '
+def send_welcome_email(email_to, name):
+    text = f"{name}, благодарим за регистрацию, надеюсь вы еще зацените .. "
     password = config("APP_PASSWORD")
     email_from = config("EMAIL_FROM")
     email_to = email_to
 
     send = SendMail(
-        password= password ,
-        email_from= email_from,
-        email_to = email_to ,
-        text = text,
-        subject = "Спасибо за регистрацию "
+        password=password,
+        email_from=email_from,
+        email_to=email_to,
+        text=text,
+        subject="Спасибо за регистрацию ",
     )
     send.connect()
     send.send()
@@ -42,14 +44,16 @@ def send_welcome_email(email_to, name ):
 def send_confirmation_code(email_to, code):
     password = config("APP_PASSWORD")
     email_from = config("EMAIL_FROM")
-    text = f"Your confirmation code : {code}, if you did not registrate , please ignore it"
+    text = (
+        f"Your confirmation code : {code}, if you did not registrate , please ignore it"
+    )
 
     send = SendMail(
         password=password,
         email_from=email_from,
         email_to=email_to,
-        text= text,
-        subject= "Код подтверждения"
+        text=text,
+        subject="Код подтверждения",
     )
     send.connect()
     send.send()
@@ -67,7 +71,6 @@ def compress_image(user_id):
 
         img = Image.open(image_field)
         img = img.convert("RGB")
-
 
         max_size = (500, 500)
         img.thumbnail(max_size)

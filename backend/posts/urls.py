@@ -4,7 +4,8 @@ from posts.views import (
     ShowAllPostsView,
     ShowPrecisePostView,
     AddPostView,
-    DeletePostView, MyNotifications,
+    DeletePostView,
+    MyNotifications,
 )
 
 urlpatterns = [
@@ -16,5 +17,7 @@ urlpatterns = [
     ),
     path("<uuid:id>/create/", AddPostView.as_view(), name="add_post_view"),
     path("<uuid:id>/delete/", DeletePostView.as_view(), name="delete_post"),
-    path("<uuid:id>/notifications/", MyNotifications.as_view(), name = "my_notifications")
+    path(
+        "<uuid:id>/notifications/", MyNotifications.as_view(), name="my_notifications"
+    ),
 ]

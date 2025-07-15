@@ -1,14 +1,46 @@
 version: "3.9"
 
+
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: > 
+      sh -c "python manage.py migrate && 
+      python manage.py runserver 0.0.0.0:8000"
+
     volumes :
       - .:/app
+      - static:/app/static
+      - sqlite_data:/app/data
     ports :
       - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - db 
+    # env_file:
+    #   - .env
+    environment:
+      DJANGO_DB_PATH: /app/data/db.sqlite3  # Путь к базе SQLite внутри контейнера
+      REDIS_HOST: redis                   # Redis hostname — совпадает с названием сервиса
+      REDIS_PORT: 6379  
+
+    depends_on : 
+      - redis 
+
+    container_name : django_web
+
+    restart : always 
+
+
+  redis : 
+    container_name : redis
+    image : redis:8   
+    ports : 
+      - "6379:6379"
+    volumes : 
+      - redis_data:/data
+
+
+volumes : 
+  redis_data: 
+  static : 
+  sqlite_data
+
+

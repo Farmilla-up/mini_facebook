@@ -10,7 +10,7 @@ def invalidate_user_posts_cache(sender, instance, **kwargs):
     cache.delete(f"post_{instance.id}")
 
 
-@receiver([post_save, post_delete], sender = Notification)
+@receiver([post_save, post_delete], sender=Notification)
 def invalidate_notification_cache(sender, instance, **kwargs):
     user_id = instance.recipient.id
-    cache.delete(f'notifications_about_post_{user_id}')
+    cache.delete(f"notifications_about_post_{user_id}")

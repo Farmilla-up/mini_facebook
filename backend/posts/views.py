@@ -1,6 +1,5 @@
 from linecache import cache
 
-from asgiref.timeout import timeout
 from django.core.serializers import serialize
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -13,7 +12,11 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from posts.serializer import ShowAllPostsSerializer, AddPostSerializer, NotificationSerializer
+from posts.serializer import (
+    ShowAllPostsSerializer,
+    AddPostSerializer,
+    NotificationSerializer,
+)
 from users.models import User
 from .models import Post, Notification
 from django.core.cache import cache
@@ -118,25 +121,24 @@ class DeletePostView(DestroyAPIView):
         instance.delete()
 
 
-
 class MyNotifications(ListAPIView):
-    """Мои оповещения """
+    """Мои оповещения"""
+
     permission_classes = [AllowAny]
-    serializer_class =  NotificationSerializer
+    serializer_class = NotificationSerializer
     queryset = Notification.objects.all()
 
-    def list(self, request , *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         user_id = kwargs.get("id")
-        cache_key = f'notifications_about_post_{user_id}'
+        cache_key = f"notifications_about_post_{user_id}"
         cache_qr = cache.get(cache_key)
 
-        if cache_qr :
+        if cache_qr:
             return cache_qr
 
-        user = User.objects.get(id = user_id)
+        user = User.objects.get(id=user_id)
 
-        queryset = Notification.objects.filter(recipient = user).order_by("-created_at")
-        cache.set(cache_key, queryset, timeout = 60)
+        queryset = Notification.objects.filter(recipient=user).order_by("-created_at")
+        cache.set(cache_key, queryset, timeout=60)
 
         return queryset
-

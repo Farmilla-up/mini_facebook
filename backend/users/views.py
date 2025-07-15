@@ -35,6 +35,8 @@ from django.utils import timezone
 from django.core.cache import cache
 from .tasks import send_welcome_email, send_confirmation_code
 
+from chat.models import Chat
+from django.core.cache import cache
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -83,7 +85,7 @@ class CreateAccauntView(GenericAPIView):
                 code=code,
             )
 
-            send_confirmation_code.delay(email_to = email, code = code)
+            send_confirmation_code.delay(email_to=email, code=code)
 
             return Response(
                 {
@@ -281,6 +283,8 @@ class AcceptOrDenyFriendShip(GenericAPIView):
                 friend_request = Friendship.objects.filter(
                     to_user=user, from_user=from_who
                 ).first()
+
+                Chat.objects.create(to_user=user, from_user=from_who)
 
                 if not friend_request:
                     return Response(

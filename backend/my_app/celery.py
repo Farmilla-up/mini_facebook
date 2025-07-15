@@ -3,16 +3,17 @@ from celery import Celery
 from celery.schedules import crontab
 
 # Указываем настройки Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'my_app.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "my_app.settings")
 
 
-app = Celery('my_app')
+app = Celery("my_app")
 
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object("django.conf:settings", namespace="CELERY")
 
 
 app.autodiscover_tasks()
 
+
 @app.task(bind=True)
 def debug_task(self):
-    print(f'Request: {self.request!r}')
+    print(f"Request: {self.request!r}")

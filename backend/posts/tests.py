@@ -5,6 +5,7 @@ from posts.models import Notification, Post
 from posts.tasks import notify_friends, delete_expired_notifications
 from users.models import User, Friendship
 
+
 @pytest.mark.django_db
 def test_notifications_and_delete_expired_notifications():
     """Проверяет создание оповещений и их последующее удаление"""
@@ -22,12 +23,11 @@ def test_notifications_and_delete_expired_notifications():
 
     Friendship.objects.create(from_user=user2, to_user=user1, accepted=True)
 
-    post = Post.objects.create(owner=user2, text='some_text')
+    post = Post.objects.create(owner=user2, text="some_text")
 
     notify_friends(user2.id, post.id)
 
     assert Notification.objects.filter(post=post, recipient=user1).exists()
-
 
     old_notification = Notification.objects.create(
         recipient=user1,

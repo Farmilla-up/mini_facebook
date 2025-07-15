@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/v1/feed/", include("feed.urls")),
     path("api/v1/like/", include("likes.urls")),
     path("api/v1/post/", include("posts.urls")),
+    path("api/v1/chat/", include("chat.urls")),
     path("api/v1/comment/", include("comments.urls")),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

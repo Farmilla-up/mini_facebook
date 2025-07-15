@@ -34,7 +34,7 @@ urlpatterns = [
         name="friends_request",
     ),
     path(
-        "<uuid:id>/accept_friendship/<str:from_who>/<str:action>/",
+        "<uuid:id>/accept_friendship/<uuid:from_who>/<str:action>/",
         AcceptOrDenyFriendShip.as_view(),
         name="accept_or_deny_friendship",
     ),

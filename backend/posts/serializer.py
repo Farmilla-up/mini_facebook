@@ -2,6 +2,7 @@ from django.core.serializers import serialize
 from rest_framework import serializers
 from .models import Post, Notification
 
+
 class ShowAllPostsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
@@ -22,6 +23,6 @@ class AddPostSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    class Meta :
+    class Meta:
         model = Notification
         exclude = ["recipient"]
