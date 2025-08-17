@@ -1,4 +1,16 @@
 media/
 db.sqlite3
-.env
 celerybeat-schedule
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.env
+venv/
+.idea/
+.vscode/
+.git/
+.DS_Store
+*.log
