@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "comments",
     "feed",
     "likes",
+    "tests",
 ]
 
 MIDDLEWARE = [

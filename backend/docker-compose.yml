@@ -17,8 +17,8 @@ services:
     # env_file:
     #   - .env
     environment:
-      DJANGO_DB_PATH: /app/data/db.sqlite3  # Путь к базе SQLite внутри контейнера
-      REDIS_HOST: redis                   # Redis hostname — совпадает с названием сервиса
+      DJANGO_DB_PATH: /app/data/db.sqlite3  
+      REDIS_HOST: redis                   
       REDIS_PORT: 6379  
 
     depends_on : 
@@ -26,21 +26,28 @@ services:
 
     container_name : django_web
 
-    restart : always 
+    restart : always
+    networks : 
+      - backend 
 
 
   redis : 
     container_name : redis
     image : redis:8   
-    ports : 
-      - "6379:6379"
     volumes : 
       - redis_data:/data
+    networks : 
+      - backend 
 
 
 volumes : 
   redis_data: 
   static : 
-  sqlite_data
+  sqlite_data: 
+
+
+
+networks: 
+  backend: 
 
 
