@@ -24,6 +24,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
 
+"""Логика создания чата и LastSeen находится в AcceptOrDenyFriendShip"""
 
 class ViewMyChats(ListAPIView):
     """Возвращает список чатов пользователя (с кешированием)."""

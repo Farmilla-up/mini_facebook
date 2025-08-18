@@ -1,4 +1,4 @@
-Django>=4.0
+Django
 djangorestframework
 python-decouple
 celery

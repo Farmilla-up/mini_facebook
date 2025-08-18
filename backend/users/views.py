@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.contrib.auth.hashers import make_password, check_password
 from django.core.serializers import serialize
 from django.db.models import Q
 from django.shortcuts import render
@@ -15,7 +16,8 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 from posts.serializer import ShowAllPostsSerializer
 from .permissions import NotAuthenticated
 from .models import User, Friendship, PreRegistration
@@ -25,6 +27,7 @@ from .serializer import (
     ChangeUserSerializer,
     EmptySerializer,
     ConfirmationEmailSerializer,
+    LoginSerializer,
 )
 from .utils import SendMail
 
@@ -32,9 +35,7 @@ from decouple import config
 from random import randint
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.core.cache import cache
 from .tasks import send_welcome_email, send_confirmation_code
-
 from chat.models import Chat, ChatLastSeen
 from django.core.cache import cache
 
@@ -75,6 +76,7 @@ class CreateAccauntView(GenericAPIView):
 
             email = serializer.validated_data["email"]
             username = serializer.validated_data["username"]
+            password = serializer.validated_data["password"]
             name = serializer.validated_data["name"]
 
             code = randint(10000, 99999)
@@ -83,6 +85,7 @@ class CreateAccauntView(GenericAPIView):
                 email=email,
                 username=username,
                 name=name,
+                password=password,
                 code=code,
             )
 
@@ -105,6 +108,7 @@ class ConfirmEmailView(GenericAPIView):
     """
     Представление для подтверждения email с помощью кода.
     Проверяет корректность и срок действия кода. При успешной проверке создаёт пользователя.
+    Кэширование кол ва попыток
     """
 
     queryset = []
@@ -118,6 +122,12 @@ class ConfirmEmailView(GenericAPIView):
         try:
             code = serializer.validated_data["code"]
             email = serializer.validated_data["email"]
+            attempts_key = f"code_attempts_{email}"
+
+            attempts = cache.get(attempts_key, 0)
+            if attempts >= 5:
+                return Response({"error": "Too many attempts"}, status=429)
+            cache.set(attempts_key, attempts + 1, timeout=300)
 
             try:
                 user = PreRegistration.objects.filter(email=email).first()
@@ -131,20 +141,82 @@ class ConfirmEmailView(GenericAPIView):
                 user.delete()
                 return Response({"error": "Code expired"}, status=400)
 
-            new_user = User.objects.create(
-                username=user.username,
+            new_user = User.objects.create_user(
                 email=user.email,
+                username=user.username,
                 name=user.name,
+                password=user.password,
                 avatar=user.avatar,
             )
             user.delete()
+            refresh = RefreshToken.for_user(new_user)
 
             send_welcome_email.delay(user.email, user.name)
 
             return Response(
-                {"message": "Email confirmed, account created", "user_id": new_user.id},
+                {
+                    "message": "Email confirmed, account created",
+                    "user_id": new_user.id,
+                    "access_token": str(refresh.access_token),
+                    "refresh_token": str(refresh),
+                },
                 status=201,
             )
+
+        except Exception as e:
+            return Response({"error": str(e)})
+
+
+class LoginView(GenericAPIView):
+    """Заход на аккаунт при помощи юзернейма или почты
+    Кэширование кол ва попыток входа
+    """
+
+    queryset = User.objects.all()
+    permission_classes = [NotAuthenticated]
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            email = serializer.validated_data.get("email")
+            username = serializer.validated_data.get("username")
+            password = serializer.validated_data["password"]
+
+            identifier = email or username
+            attempts_key = f"login_attempts_{identifier}"
+
+            attempts = cache.get(attempts_key, 0)
+            if attempts >= 8:
+                return Response({"error": "Too many attempts"}, status=429)
+            cache.set(attempts_key, attempts + 1, timeout=300)
+
+            if not email and not username:
+                return Response(
+                    {"error": "Please provide email or username"}, status=400
+                )
+
+            if email:
+                user = User.objects.filter(email=email).first()
+            else:
+                user = User.objects.filter(username=username).first()
+
+            if user and check_password(password, user.password):
+                cache.delete(attempts_key)
+                refresh = RefreshToken.for_user(user)
+                return Response(
+                    {
+                        "refresh": str(refresh),
+                        "access": str(refresh.access_token),
+                    },
+                    status=200,
+                )
+
+            else:
+                return Response(
+                    {"error": "Invalid credentials or password"}, status=400
+                )
 
         except Exception as e:
             return Response({"error": str(e)})
@@ -239,7 +311,7 @@ class ShowAllFriends(RetrieveAPIView):
 
 class RequestsListFriendShipView(RetrieveAPIView):
     """
-    Входящие запросы в друзья (тебе ещё нужно принять).
+    Входящие запросы в друзья (т е ещё нужно принять).
     """
 
     lookup_field = "id"
@@ -270,6 +342,7 @@ class AcceptOrDenyFriendShip(GenericAPIView):
     """
     Обработка действий над запросом в друзья: принятие или отклонение.
     В зависимости от параметра 'action' в URL выполняет нужное действие.
+    В случае принятия создает чат между юзерами
     """
 
     permission_classes = [AllowAny]

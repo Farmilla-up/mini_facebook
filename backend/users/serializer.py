@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exclude = ["created_at", "id", "friends"]
+        fields = ["email", "username", "name", "password"]
 
 
 class ChangeUserSerializer(serializers.Serializer):
@@ -37,3 +37,9 @@ class EmptySerializer(serializers.Serializer):
 class ConfirmationEmailSerializer(serializers.Serializer):
     code = serializers.IntegerField(max_value=99999, min_value=10000)
     email = serializers.EmailField(max_length=4000)
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=4000, required=False)
+    username = serializers.CharField(max_length=4000, required=False)
+    password = serializers.CharField(max_length=4000)

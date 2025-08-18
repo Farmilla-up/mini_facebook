@@ -14,6 +14,7 @@ from .views import (
     SubscribersListView,
     DeleteFriendView,
     ConfirmEmailView,
+    LoginView
 )
 
 router = DefaultRouter()
@@ -21,6 +22,7 @@ router = DefaultRouter()
 urlpatterns = [
     path("registrate/", CreateAccauntView.as_view(), name="registration"),
     path("confirm-email/", ConfirmEmailView.as_view(), name="confirm_email"),
+    path("login/", LoginView.as_view(), name="login"),
     path("users/", UserViewSet.as_view({"get": "list"}), name="users_view"),
     path(
         "<uuid:id>/precise/", GetPreciseUserView.as_view(), name="get_precise_profile"

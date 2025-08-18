@@ -3,7 +3,7 @@ from random import randint
 from users.models import User, Friendship
 from chat.models import Chat, ChatLastSeen
 from posts.models import Post
-
+from django.contrib.auth.hashers import make_password
 
 class TestUserManager:
     """
@@ -34,6 +34,7 @@ class TestUserManager:
             defaults={
                 "name": f"Test_user_{rand1}",
                 "email": f"Test_email_{rand1}@gmail.com",
+                "password": make_password("12345"),
             },
         )
         cls.user2, _ = User.objects.get_or_create(
@@ -41,6 +42,7 @@ class TestUserManager:
             defaults={
                 "name": f"Test_user_{rand2}",
                 "email": f"Test_email_{rand2}@gmail.com",
+                "password" : make_password("12345"),
             },
         )
         return cls.user1, cls.user2
