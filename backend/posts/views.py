@@ -40,7 +40,8 @@ class ShowAllPostsView(ListAPIView):
         if cache_qr:
             return Response(cache_qr)
 
-        queryset = Post.objects.filter(owner_id=user_id).order_by("-created_at")
+        queryset = Post.objects.filter(
+            owner_id=user_id).order_by("-created_at")
         serializer = self.get_serializer(queryset, many=True)
         data = serializer.data
         cache.set(cache_key, data, timeout=60)
@@ -138,7 +139,8 @@ class MyNotifications(ListAPIView):
 
         user = User.objects.get(id=user_id)
 
-        queryset = Notification.objects.filter(recipient=user).order_by("-created_at")
+        queryset = Notification.objects.filter(
+            recipient=user).order_by("-created_at")
         cache.set(cache_key, queryset, timeout=60)
 
         return queryset

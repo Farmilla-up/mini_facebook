@@ -8,6 +8,7 @@ import pytest
 
 @pytest.mark.django_db
 def test_last_seen_view_online():
+    """Тест на заход юзера в чат (и последущее отображение  last seen)"""
     client = APIClient()
 
     user1 = User.objects.create(
@@ -19,7 +20,8 @@ def test_last_seen_view_online():
 
     chat = Chat.objects.create(from_user=user1, to_user=user2)
 
-    ChatLastSeen.objects.create(chat=chat, user=user2, last_seen=timezone.now())
+    ChatLastSeen.objects.create(
+        chat=chat, user=user2, last_seen=timezone.now())
 
     url = f"/api/v1/chat/{user1.id}/last_seen/{chat.id}/"
     response = client.get(url)

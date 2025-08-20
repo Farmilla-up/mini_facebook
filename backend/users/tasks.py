@@ -33,7 +33,7 @@ def send_welcome_email(email_to, name):
         email_from=email_from,
         email_to=email_to,
         text=text,
-        subject="Спасибо за регистрацию ",
+        subject="Спасибо за регистрацию",
     )
     send.connect()
     send.send()

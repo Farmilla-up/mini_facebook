@@ -42,7 +42,8 @@ class CreateCommentView(GenericAPIView):
                     to_post=post, from_who=owner, text=text
                 )
             else:
-                parent_comment = get_object_or_404(Comment, id=parent_comment_id)
+                parent_comment = get_object_or_404(
+                    Comment, id=parent_comment_id)
                 comment = Comment.objects.create(
                     to_post=post,
                     from_who=owner,

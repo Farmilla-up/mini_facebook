@@ -34,7 +34,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(
         upload_to="photo", null=True, blank=True, verbose_name="Ава"
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Когда зареган")
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name="Когда зареган")
     friends = models.ManyToManyField(
         "self", through="Friendship", symmetrical=False, related_name="friends_of"
     )

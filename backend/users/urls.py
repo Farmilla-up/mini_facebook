@@ -14,7 +14,7 @@ from .views import (
     SubscribersListView,
     DeleteFriendView,
     ConfirmEmailView,
-    LoginView
+    LoginView,
 )
 
 router = DefaultRouter()
@@ -40,8 +40,10 @@ urlpatterns = [
         AcceptOrDenyFriendShip.as_view(),
         name="accept_or_deny_friendship",
     ),
-    path("<uuid:id>/subscribe/<uuid:to>/", SubscribeView.as_view(), name="subscribe"),
-    path("<uuid:id>/subscribes/", SubscribesListView.as_view(), name="all_subscribes"),
+    path("<uuid:id>/subscribe/<uuid:to>/",
+         SubscribeView.as_view(), name="subscribe"),
+    path("<uuid:id>/subscribes/",
+         SubscribesListView.as_view(), name="all_subscribes"),
     path(
         "<uuid:id>/subscribers/", SubscribersListView.as_view(), name="all_subscribers"
     ),

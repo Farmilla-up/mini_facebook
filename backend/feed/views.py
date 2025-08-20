@@ -37,7 +37,8 @@ class MyFeedView(ListAPIView):
 
             all_id = list(friends_to) + list(friends_from_or_subscribed)
 
-            posts = Post.objects.filter(owner__in=all_id).order_by("-created_at")
+            posts = Post.objects.filter(
+                owner__in=all_id).order_by("-created_at")
             cache.set(cache_key, posts, timeout=60)
 
             return posts

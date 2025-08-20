@@ -52,7 +52,8 @@ class SendMail:
         msg.attach(MIMEText(self.text_with_code, "plain"))
 
         try:
-            self.server.sendmail(self.email_from, self.email_to, msg.as_string())
+            self.server.sendmail(
+                self.email_from, self.email_to, msg.as_string())
             return {"success": True, "text": f"Письмо отправлено на {self.email_to}"}
         except Exception as e:
             return {"success": False, "error": str(e)}

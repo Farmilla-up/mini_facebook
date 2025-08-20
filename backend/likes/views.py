@@ -79,7 +79,8 @@ class MyLikesView(ListAPIView):
         if cache_qr:
             return Response(cache_qr)
 
-        liked = Like.objects.filter(from_who=user).values_list("to_post_id", flat=True)
+        liked = Like.objects.filter(
+            from_who=user).values_list("to_post_id", flat=True)
         posts = Post.objects.filter(id__in=liked).order_by("-created_at")
         serializer = self.get_serializer(posts, many=True)
         data = serializer.data
