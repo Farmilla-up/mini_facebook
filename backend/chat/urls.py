@@ -11,8 +11,7 @@ urlpatterns = [
     path(
         "<uuid:id>/write/<int:chat_id>/", WriteMessage.as_view(), name="write_message"
     ),
-    path("<uuid:id>/delete/<int:chat_id>/",
-         DeleteChat.as_view(), name="delete_chat"),
+    path("<uuid:id>/delete/<int:chat_id>/", DeleteChat.as_view(), name="delete_chat"),
     path(
         "<uuid:id>/last_seen/<int:chat_id>/", LastSeenView.as_view(), name="last_seen"
     ),

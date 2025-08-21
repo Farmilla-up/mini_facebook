@@ -36,6 +36,5 @@ def notify_friends(user_id, post_id):
 @shared_task
 def delete_expired_notifications():
     threshold = timezone.now() - timedelta(days=30)
-    old_notifications = Notification.objects.filter(
-        created_at__lte=threshold).delete()
+    old_notifications = Notification.objects.filter(created_at__lte=threshold).delete()
     return

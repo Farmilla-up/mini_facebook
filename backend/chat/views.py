@@ -26,7 +26,6 @@ from datetime import timedelta
 
 """Логика создания чата и LastSeen находится в AcceptOrDenyFriendShip"""
 
-
 class ViewMyChats(ListAPIView):
     """Возвращает список чатов пользователя (с кешированием)."""
 
@@ -44,8 +43,7 @@ class ViewMyChats(ListAPIView):
                 return Response(cached_data)
 
             user = User.objects.get(id=user_id)
-            user_chats = Chat.objects.filter(
-                Q(from_user=user) | Q(to_user=user))
+            user_chats = Chat.objects.filter(Q(from_user=user) | Q(to_user=user))
 
             serializer = self.get_serializer(
                 user_chats, many=True, context={"user": user}
@@ -80,8 +78,7 @@ class ViewPreciseChat(ListAPIView):
             user = get_object_or_404(User, id=user_id)
             chat = get_object_or_404(Chat, id=chat_id)
 
-            messages = Message.objects.filter(
-                to_chat=chat).order_by("-created_at")
+            messages = Message.objects.filter(to_chat=chat).order_by("-created_at")
 
             ChatLastSeen.objects.update_or_create(
                 chat=chat, user=user, defaults={"last_seen": timezone.now()}

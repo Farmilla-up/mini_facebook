@@ -405,16 +405,14 @@ class SubscribeView(GenericAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            existing = Friendship.objects.filter(
-                from_user=from_, to_user=to_).first()
+            existing = Friendship.objects.filter(from_user=from_, to_user=to_).first()
             if existing:
                 return Response(
                     {"message": "Already sent request or already subscribed."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            friend_request = Friendship.objects.create(
-                from_user=from_, to_user=to_)
+            friend_request = Friendship.objects.create(from_user=from_, to_user=to_)
             return Response({"success": True}, status=status.HTTP_201_CREATED)
 
         except User.DoesNotExist:
@@ -495,8 +493,7 @@ class DeleteFriendView(GenericAPIView):
             whom = User.objects.get(id=kwargs["whom"])
 
             friendship = Friendship.objects.filter(
-                Q(from_user=user, to_user=whom) | Q(
-                    from_user=whom, to_user=user),
+                Q(from_user=user, to_user=whom) | Q(from_user=whom, to_user=user),
                 accepted=True,
             ).first()
 
@@ -513,8 +510,7 @@ class DeleteFriendView(GenericAPIView):
                 else friendship.to_user
             )
 
-            Friendship.objects.create(
-                from_user=other, to_user=user, accepted=False)
+            Friendship.objects.create(from_user=other, to_user=user, accepted=False)
 
             return Response(
                 {"status": "Unfriended. Now one-way subscription."},

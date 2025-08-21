@@ -5,7 +5,6 @@ from chat.models import Chat, ChatLastSeen
 from posts.models import Post
 from django.contrib.auth.hashers import make_password
 
-
 class TestUserManager:
     """
     Класс-менеджер для создания и управления тестовыми объектами:
@@ -43,7 +42,7 @@ class TestUserManager:
             defaults={
                 "name": f"Test_user_{rand2}",
                 "email": f"Test_email_{rand2}@gmail.com",
-                "password": make_password("12345"),
+                "password" : make_password("12345"),
             },
         )
         return cls.user1, cls.user2

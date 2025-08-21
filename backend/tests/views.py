@@ -8,20 +8,16 @@ class CreateTestUsersView(APIView):
 
     def get(self, request):
         user1, user2 = TestUserManager.create_users()
-        return Response(
-            {
-                "user1_id": {
-                    "id": user1.id,
-                    "email": user1.email,
-                    "password": 12345,
-                },
-                "user2_id": {
-                    "id": user2.id,
-                    "email": user2.email,
-                    "password": 12345,
-                },
-            }
-        )
+        return Response({"user1_id": {
+            "id": user1.id,
+            "email": user1.email,
+            "password": 12345,
+        },
+            "user2_id": {
+            "id": user2.id,
+            "email": user2.email,
+            "password": 12345,
+        }})
 
 
 class CreateTestChatView(APIView):
@@ -40,8 +36,7 @@ class CreateTestFriendshipView(APIView):
     def get(self, request):
         friendship, user1, user2 = TestUserManager.create_friendship()
         return Response(
-            {"friendship_id": friendship.id,
-                "user1_id": user1.id, "user2_id": user2.id}
+            {"friendship_id": friendship.id, "user1_id": user1.id, "user2_id": user2.id}
         )
 
 
